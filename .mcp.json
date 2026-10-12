@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "looped": {
+      "type": "http",
+      "url": "https://api.looped.sh/mcp"
+    }
+  }
+}

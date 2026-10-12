@@ -1,0 +1,8 @@
+{
+  "name": "loopedautomation",
+  "owner": { "name": "Looped Automation", "url": "https://looped.sh" },
+  "description": "The Looped plugin for Claude: time, invoicing, books and payroll from chat.",
+  "plugins": [
+    { "name": "looped", "source": "./", "description": "Run your business in Looped from Claude." }
+  ]
+}
