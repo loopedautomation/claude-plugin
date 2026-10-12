@@ -39,7 +39,7 @@ Goal: check the proposed accounts, turn repeated patterns into bank rules, and a
 
 ## Capture bills and receipts
 
-- A supplier invoice with payment terms is a bill. `list_suppliers` or `create_supplier`, then `create_bill` with each line net of VAT in cents, its account and VAT treatment (STANDARD is 15% in ZA; pass `vatCents` as printed when it differs). `approve_bill` posts it to Accounts Payable; `pay_bill` records payment, with `statementLineId` whenever the payment is on a statement. `aged_payables` shows what is owed. `void_bill` is irreversible.
+- A supplier invoice with payment terms is a bill. `list_suppliers` or `create_supplier`, then `create_bill` with each line net of VAT in cents, its account and VAT treatment (STANDARD is 15% in ZA; set `vatCents` as printed when it differs). `approve_bill` posts it to Accounts Payable; `pay_bill` records payment, with `statementLineId` whenever the payment is on a statement. `aged_payables` shows what is owed. `void_bill` is irreversible.
 - A till slip or card receipt (spend paid on the spot) is a receipt. `capture_receipt` from an attachment, an upload key or the slip's text; the server reads merchant, date, total and VAT and suggests an account. Check `possibleDuplicateOf`. Ask how it was paid when you cannot tell, then `confirm_receipt`. A receipt paid from the business account waits for its bank line; `match_receipt` posts it when the line arrives.
 - `convert_bill_to_receipt` and `convert_receipt_to_bill` move a draft between the two. `attach_document` adds a file to an existing bill, line or journal.
 - Foreign-currency bills convert at their date's rate on approval; `set_exchange_rate` when the bank's actual rate should be used.
@@ -70,7 +70,7 @@ Goal: currency, who the invoice is from, how to be paid, the clients, and a firs
 
 ## Invoice from logged time and chase what is owed
 
-1. Resolve the client (`list_clients`) and projects (`search_projects`). Check rates with `list_project_member_rates`; `create_invoice_from_time_entries` fails with `missing_rate` when a project has none, so ask for one and pass `hourlyRate`. Pass `includeTeam: true` to bill everyone's time (needs a Track role that sees it). Check `taxPercentage` against the company's VAT registration.
+1. Resolve the client (`list_clients`) and projects (`search_projects`). Check rates with `list_project_member_rates`; `create_invoice_from_time_entries` fails with `missing_rate` when a project has none, so ask for one and set `hourlyRate`. Set `includeTeam: true` to bill everyone's time (needs a Track role that sees it). Check `taxPercentage` against the company's VAT registration.
 2. Call it once per client for the period. Show the hours, line items and total from the reply, with the PDF link.
 3. Under the reversible dial, `issue_invoice` once the user has approved the draft (it counts as owed and posts to the books). `send_invoice` only on an explicit ask; it emails the client. If the user emailed it themselves, `issue_invoice` with `sentAt`.
 4. Chasing: `list_customer_balances` for who owes what, `get_client_statement` for a statement to send, `list_invoices` filtered to overdue. Draft the chaser text in the reply; Looped sends statements and invoices, and anything else the user sends from their own mail.
@@ -80,24 +80,24 @@ Goal: currency, who the invoice is from, how to be paid, the clients, and a firs
 
 - `get_vat201` for the calendar year gives each VAT period's output, input and net VAT plus the `efiling` figures to type into eFiling (supply fields in whole rands, VAT fields with cents). Present those figures as a table. Only a person finalises or reopens a VAT201 and files it. Before presenting, check the period's bank lines are all reviewed; unreviewed lines understate the return.
 - Zero-rated and exempt supplies must carry their treatment on the posting to appear in fields 2 and 3; reclassify with `reclassify_statement_lines` or `recode_journal_entries` when they were posted as standard or no VAT.
-- `get_tax_computation` for the financial year shows accounting profit, add-backs, allowances (automatic wear and tear), taxable income and tax. `estimate_provisional_tax` computes and saves an IRP6 estimate for period 1 or 2 from it; pass `useSbcRates` when the company is a Small Business Corporation and `alreadyPaidCents` for period 2. Rerunning it replaces the saved estimate, so under the reversible dial compute and save it, then show the computation and the estimate side by side. The user files the IRP6 themselves.
+- `get_tax_computation` for the financial year shows accounting profit, add-backs, allowances (automatic wear and tear), taxable income and tax. `estimate_provisional_tax` computes and saves an IRP6 estimate for period 1 or 2 from it; set `useSbcRates` when the company is a Small Business Corporation and `alreadyPaidCents` for period 2. Rerunning it replaces the saved estimate, so under the reversible dial compute and save it, then show the computation and the estimate side by side. The user files the IRP6 themselves.
 
 ## Year-end and the AFS pack
 
 1. Close the last month with the month-end playbook. Then `run_depreciation` for any remaining period, `run_fx_revaluation` at year end, and `get_tax_computation`.
-2. `get_deferred_tax`; show it and, under the reversible dial, `post_deferred_tax` (rerunning posts only the further movement). Pass `recogniseAssessedLoss` only when the user says to.
-3. `compile_afs_pack` for the year with `assurance` (ask when it is not set; South Africa's Companies Act requires the statement on the cover). Pass `from` and `to` for an interim pack, which is returned without being saved. `sync_afs_notes` pulls the notes from the ledger; `create_afs_note`, `update_afs_note` and `reorder_afs_notes` for the narrative notes (accounting policies, related parties, events after the reporting date). Recompiling a draft pack is safe.
+2. `get_deferred_tax`; show it and, under the reversible dial, `post_deferred_tax` (rerunning posts only the further movement). Set `recogniseAssessedLoss` only when the user says to.
+3. `compile_afs_pack` for the year with `assurance` (ask when it is not set; South Africa's Companies Act requires the statement on the cover). Set `from` and `to` for an interim pack, which is returned without being saved. `sync_afs_notes` pulls the notes from the ledger; `create_afs_note`, `update_afs_note` and `reorder_afs_notes` for the narrative notes (accounting policies, related parties, events after the reporting date). Recompiling a draft pack is safe.
 4. Present the income statement, balance sheet, equity and cash flow from the pack with the comparatives, and the list of notes.
 5. Closing the year happens in Financials by a person. `finalise_afs_pack` freezes the pack of a closed year and is irreversible: only on an explicit ask, after the year is closed.
 6. `export_report` (trial balance, general ledger or journal as CSV or xlsx) for the accountant; present the link.
 
 ## Payroll: draft, explain and finalise a pay run
 
-1. `list_pay_runs` for the cycle and its runs. `draft_pay_run` drafts the current open period (or returns the existing draft) and reads hours from Track and unpaid leave from Leave. Pass `cycleId` when the company has several cycles.
+1. `list_pay_runs` for the cycle and its runs. `draft_pay_run` drafts the current open period (or returns the existing draft) and reads hours from Track and unpaid leave from Leave. Set `cycleId` when the company has several cycles.
 2. `get_pay_run` and `get_pay_run_inputs` to explain the run: gross, PAYE, UIF, SDL and net per employee, where hours and leave came from, and what changed since last run. `get_payslip` for one employee. Distinguish the draft's saved inputs from Track's current figures. Keep identity, tax and bank numbers masked.
 3. `add_pay_run_item` for once-off items the user asks for (bonus, deduction, reimbursement); each one makes the run unclean.
 4. Refreshing the draft with `useLatestInputs: true` replaces the saved inputs with Track's and Leave's current figures. Only when the user asked for current figures, and say what it replaces first.
-5. Finalising: only `process_pay_run`, only a clean run (`clean: true`), and only after showing the user the employee count, gross, PAYE and net totals and getting an explicit yes in this chat. Pass that net as `expectedNetCents`. On `RUN_HAS_CHANGES` give the `reviewUrl` so a person ticks each change in Payroll; on `TOTALS_CHANGED` show the new totals and ask again; on `APPROVAL_REQUIRED` say who has to approve it. Reversing a run, sending payslips and producing filings are done by a person.
+5. Finalising: only `process_pay_run`, only a clean run (`clean: true`), and only after showing the user the employee count, gross, PAYE and net totals and getting an explicit yes in this chat. Set that net as `expectedNetCents`. On `RUN_HAS_CHANGES` give the `reviewUrl` so a person ticks each change in Payroll; on `TOTALS_CHANGED` show the new totals and ask again; on `APPROVAL_REQUIRED` say who has to approve it. Reversing a run, sending payslips and producing filings are done by a person.
 6. `post_payroll_run` posts a finalised run's journal to Financials when it is not already posted; `list_payroll_runs` shows which are.
 7. New starters: `create_employee` with the basic fields, then give the `completeDetailsUrl`. `set_employee_sdl_exclusion` when the company is under the SDL threshold.
 
