@@ -1,13 +1,18 @@
 {
   "name": "looped",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Run your business in Looped from Claude: track time, manage projects and tasks, create and send invoices and credit notes, keep the books in Financials (bank statements, bills, receipts, journals, fixed assets, loans, VAT201, provisional tax, year-end and AFS), prepare and finalise payroll, and set up scheduled routines. Works across every company you belong to. You decide how far each job goes, from draft-only to posting everything that can be reversed.",
   "author": {
     "name": "Looped Automation",
     "url": "https://looped.sh"
   },
   "homepage": "https://looped.sh",
+  "repository": "https://github.com/loopedautomation/claude-plugin",
+  "icon": "./assets/icon.png",
+  "documentationUrl": "https://docs.looped.sh",
+  "supportUrl": "https://looped.sh/contact",
   "privacyPolicyUrl": "https://looped.sh/privacy",
+  "termsOfServiceUrl": "https://looped.sh/terms",
   "license": "Apache-2.0",
   "keywords": [
     "accounting",
