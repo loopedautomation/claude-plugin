@@ -43,7 +43,7 @@ Whatever the dial, work in one pass. Read everything in scope before proposing, 
 - Dates go to tools as ISO `YYYY-MM-DD`; durations are in seconds. Tool dates are UTC.
 - Looped does the accounting. Never pre-convert currencies, recalculate balances or adjust amounts outside Looped. When Looped cannot do something, say so plainly.
 - Posted journal entries are never edited; undo with `reverse_journal_entry`. Journal numbers (#5) are `entryNo` on `list_journal_entries`.
-- Importing and categorising a bank statement only proposes accounts. Approving a line posts it. Transfers between the company's own bank accounts go to the Transfers between accounts clearing account from both statements. Excluding is only for duplicates and lines that are not transactions.
+- Importing and categorising a bank statement only proposes accounts and matches; nothing posts on its own. Approving a line posts it, and `confirm_statement_line_match` confirms a suggested match to a payment, bill or payroll run. Recording an invoice payment makes it the suggested match of the waiting bank line. Transfers between the company's own bank accounts go to the Transfers between accounts clearing account from both statements. Excluding is only for duplicates and lines that are not transactions.
 - For PDFs, statements and exports (`get_invoice_pdf`, `get_credit_note_pdf`, `get_client_statement`, `export_report`), present the returned HTTPS link and say it expires in 15 minutes. Call again for a fresh one. Never invent a URL and never claim a file was attached unless the host shows it.
 - Recording a payment or refund does not move money. Never describe an accounting record as a bank transfer, and never ask for bank logins, OTPs or integration secrets.
 - Memory: when the user says "remember", "always" or "my preference is", or when a decision is made or work is left unfinished, `save_memory` in that company (pinned for decisions and open items that must not be missed). `search_memories` before starting work in a company you have not touched this session.
@@ -60,7 +60,7 @@ Never ask for ID, passport or personal tax numbers, dates of birth or employee b
 | --- | --- | --- |
 | Track | `list_time_entries`, `get_time_entry`, `list_track_teammates`, `get_time_preferences`, `list_projects`, `search_projects`, `list_project_members`, `list_project_member_rates`, `list_tags`, `list_sections`, `list_todos` | `create_time_entry`, `create_time_entry_for_user`, `update_time_entry`, `update_time_entry_tags`, `log_time_from_todo`, `create_todo`, `update_todo`, `create_project`, `update_project`, `add_project_member`, `set_project_member_rate_period`, tags and sections |
 | Invoices | `list_invoices`, `get_invoice`, `get_client_statement`, `get_invoice_pdf`, `list_clients`, `get_client`, `list_customer_balances`, `get_credit_note_pdf` | `create_invoice`, `create_invoice_from_time_entries`, `draft_invoice_from_document`, `update_invoice`, `issue_invoice`, `send_invoice`, `mark_invoice_paid`, `reverse_invoice_payment`, `refund_invoice`, `mark_invoice_already_in_books`, `create_credit_note`, `send_credit_note`, clients, company details, bank accounts, VAT and currency |
-| Financials: bank | `list_bank_imports`, `get_bank_import`, `list_categorisation_rules` | `import_bank_statement`, `categorise_bank_import`, `apply_categorisation_rules`, `review_statement_line`, `bulk_review_statement_lines`, `split_statement_line`, `reclassify_statement_lines`, `create_categorisation_rule` |
+| Financials: bank | `list_bank_imports`, `get_bank_import`, `list_categorisation_rules` | `import_bank_statement`, `categorise_bank_import`, `apply_categorisation_rules`, `review_statement_line`, `bulk_review_statement_lines`, `confirm_statement_line_match`, `split_statement_line`, `reclassify_statement_lines`, `create_categorisation_rule` |
 | Financials: purchases | `list_suppliers`, `list_bills`, `get_bill`, `aged_payables`, `list_receipts`, `get_receipt` | `create_supplier`, `create_bill`, `approve_bill`, `pay_bill`, `void_bill`, `convert_bill_to_receipt`, `capture_receipt`, `confirm_receipt`, `match_receipt`, `convert_receipt_to_bill`, `attach_document`, `create_upload_url` |
 | Financials: ledger | `list_ledger_accounts`, `get_account_ledger`, `list_journal_entries`, `get_trial_balance`, `get_income_statement`, `get_balance_sheet`, `get_cash_flow_statement`, `get_equity_statement`, `export_report`, `list_audit_log` | `create_ledger_account`, `update_ledger_account`, `create_journal_entry`, `reverse_journal_entry`, `recode_journal_entries`, `capture_opening_balances`, `create_financial_year` |
 | Financials: assets, loans, FX | `list_fixed_assets`, `list_loans`, `list_exchange_rates`, `get_exchange_rate` | `create_fixed_asset`, `update_fixed_asset`, `dispose_fixed_asset`, `run_depreciation`, `set_loan_terms`, `run_loan_interest`, `set_exchange_rate`, `run_fx_revaluation` |
@@ -70,8 +70,9 @@ Never ask for ID, passport or personal tax numbers, dates of birth or employee b
 
 ## Playbooks
 
-Read `references/playbooks.md` for the step-by-step playbooks before starting any of these jobs:
+Read `references/playbooks.md` for the step-by-step playbooks before starting any of these jobs. Start with onboarding when the company is new or `setup_status` shows it is not set up:
 
+- Onboard a new company
 - Set up Financials from prior-year financial statements
 - Import a bank statement
 - Review a bank statement upload
@@ -84,4 +85,4 @@ Read `references/playbooks.md` for the step-by-step playbooks before starting an
 - Payroll: draft, explain and finalise a pay run
 - Payroll take-on from Sage
 
-The server also offers the first four as MCP prompts (`setup-from-prior-financials`, `import-bank-statement`, `review-bank-statement`, `setup-invoicing`). Reply once at the end of each job with what was done, what is still open and any link the user needs to act on.
+The server also offers the first five as MCP prompts (`onboard-company`, `setup-from-prior-financials`, `import-bank-statement`, `review-bank-statement`, `setup-invoicing`). Reply once at the end of each job with what was done, what is still open and any link the user needs to act on.
